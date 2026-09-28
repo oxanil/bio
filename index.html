@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b0d12">
+  <meta name="description" content="HYD — personal bio">
+  <title>oxanil</title>
+  <link rel="icon" type="image/jpeg" href="favicon.jpg">
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --text: #fff;
+      --muted: rgba(255,255,255,.62);
+      --glass: rgba(8, 11, 17, .52);
+      --border: rgba(255,255,255,.13);
+      --accent: #ffffff;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      background: #080a0f url("background.jpg") center / cover fixed no-repeat;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        linear-gradient(180deg, rgba(4,7,12,.35), rgba(4,7,12,.76)),
+        radial-gradient(circle at 50% 10%, rgba(255,255,255,.12), transparent 35%);
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      pointer-events: none;
+    }
+
+    .noise {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+      opacity: .035;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+    }
+
+
+    .start-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      background: rgba(3, 5, 9, .78);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: opacity .55s ease, visibility .55s ease;
+    }
+
+    .start-screen.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .start-box {
+      width: min(390px, 100%);
+      min-height: 130px;
+      padding: 28px 24px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 24px;
+      color: #fff;
+      cursor: pointer;
+      background: rgba(10, 13, 19, .76);
+      box-shadow: 0 25px 90px rgba(0,0,0,.45);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      transition: transform .3s ease, border-color .3s ease, background .3s ease;
+    }
+
+    .start-box:hover {
+      transform: scale(1.025);
+      border-color: rgba(255,255,255,.42);
+      background: rgba(18, 21, 28, .82);
+    }
+
+    .start-box span {
+      display: block;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: .5px;
+    }
+
+    .start-box small {
+      display: block;
+      margin-top: 10px;
+      color: rgba(255,255,255,.45);
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .page {
+      width: min(560px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 48px 0 130px;
+    }
+
+    .profile {
+      text-align: center;
+      animation: rise .8s ease both;
+    }
+
+    .avatar-wrap {
+      width: 118px;
+      height: 118px;
+      margin: 0 auto 18px;
+      padding: 3px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #fff, rgba(255,255,255,.08), var(--accent));
+      box-shadow: 0 0 45px rgba(255,255,255,.14);
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      display: block;
+      object-fit: cover;
+      border: 3px solid rgba(10,12,17,.9);
+    }
+
+    h1 {
+      font-size: 31px;
+      letter-spacing: -1.2px;
+      line-height: 1;
+    }
+
+    .verified {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 19px;
+      height: 19px;
+      margin-left: 5px;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #10140b;
+      font-size: 12px;
+      vertical-align: 4px;
+      font-weight: 900;
+    }
+
+    .username {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .bio {
+      max-width: 450px;
+      margin: 15px auto 20px;
+      color: rgba(255,255,255,.82);
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .socials {
+      display: flex;
+      justify-content: center;
+      gap: 9px;
+      margin-bottom: 28px;
+    }
+
+    .social {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      color: #fff;
+      text-decoration: none;
+      background: rgba(255,255,255,.07);
+      backdrop-filter: blur(12px);
+      transition: .25s ease;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .social:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255,255,255,.55);
+      background: rgba(255,255,255,.13);
+      box-shadow: 0 10px 30px rgba(0,0,0,.22);
+    }
+
+    .section-title {
+      margin: 0 2px 10px;
+      color: rgba(255,255,255,.48);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+
+    .links {
+      display: grid;
+      gap: 11px;
+    }
+
+    .link-card {
+      position: relative;
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 15px;
+      color: #fff;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--glass);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      box-shadow: 0 16px 50px rgba(0,0,0,.16);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: transform .35s cubic-bezier(.22,1,.36,1),
+                  border-color .25s ease,
+                  background .25s ease;
+      animation: rise .7s ease both;
+    }
+
+    .link-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(100deg, rgba(255,255,255,.07), transparent 45%);
+      pointer-events: none;
+    }
+
+    .link-card:hover {
+      transform: translateY(-3px) scale(1.008);
+      border-color: rgba(255,255,255,.28);
+      background: rgba(10,14,21,.67);
+    }
+
+    .icon {
+      position: relative;
+      z-index: 1;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.09);
+      font-size: 17px;
+    }
+
+    .link-text {
+      position: relative;
+      z-index: 1;
+      min-width: 0;
+      flex: 1;
+    }
+
+    .link-title {
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .link-sub {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .arrow {
+      position: relative;
+      z-index: 1;
+      color: rgba(255,255,255,.5);
+      font-size: 20px;
+      transition: transform .25s ease;
+    }
+
+    .link-card:hover .arrow {
+      transform: translateX(4px);
+      color: #fff;
+    }
+
+    .featured {
+      margin-top: 11px;
+      padding: 19px;
+      border-radius: 21px;
+      border: 1px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.12), rgba(255,255,255,.04)),
+        rgba(8,11,17,.52);
+      backdrop-filter: blur(18px);
+    }
+
+    .featured-label {
+      color: var(--accent);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 2px;
+    }
+
+    .featured h2 {
+      margin-top: 8px;
+      font-size: 19px;
+    }
+
+    .featured p {
+      margin-top: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .featured-btn {
+      display: inline-flex;
+      margin-top: 14px;
+      padding: 10px 15px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #10140b;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 800;
+      transition: .25s ease;
+    }
+
+    .featured-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(255,255,255,.2);
+    }
+
+    .music {
+      margin-top: 22px;
+      padding: 15px;
+      border-radius: 22px;
+      border: 1px solid var(--border);
+      background: rgba(8,11,17,.63);
+      backdrop-filter: blur(20px);
+      box-shadow: 0 18px 55px rgba(0,0,0,.2);
+    }
+
+    .music-top {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .music-cover {
+      width: 52px;
+      height: 52px;
+      flex: 0 0 52px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+
+    .music-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .music-label {
+      color: var(--accent);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 1.7px;
+    }
+
+    .music-title {
+      margin-top: 4px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .music-sub {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .play {
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 50%;
+      cursor: pointer;
+      background: #fff;
+      color: #080a0f;
+      font-size: 16px;
+      transition: .25s ease;
+    }
+
+    .play:hover {
+      transform: scale(1.06);
+    }
+
+    .volume-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 13px;
+    }
+
+    .volume-icon {
+      width: 20px;
+      text-align: center;
+      font-size: 13px;
+      opacity: .75;
+    }
+
+    .volume {
+      flex: 1;
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      border-radius: 99px;
+      background: rgba(255,255,255,.14);
+      cursor: pointer;
+    }
+
+    .volume::-webkit-slider-thumb {
+      appearance: none;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #fff;
+    }
+
+    .volume::-moz-range-thumb {
+      width: 11px;
+      height: 11px;
+      border: 0;
+      border-radius: 50%;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .volume-value {
+      width: 34px;
+      text-align: right;
+      color: rgba(255,255,255,.42);
+      font-size: 10px;
+    }
+
+    .progress-wrap {
+      margin-top: 14px;
+    }
+
+    .progress {
+      width: 100%;
+      height: 4px;
+      appearance: none;
+      border-radius: 99px;
+      background: rgba(255,255,255,.14);
+      cursor: pointer;
+    }
+
+    .progress::-webkit-slider-thumb {
+      appearance: none;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+
+    .time {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 7px;
+      color: rgba(255,255,255,.4);
+      font-size: 10px;
+    }
+
+    footer {
+      margin-top: 28px;
+      text-align: center;
+      color: rgba(255,255,255,.35);
+      font-size: 10px;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    
+
+    .skills {
+      margin-top: 18px;
+    }
+
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .skill-card {
+      min-height: 105px;
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 20px;
+      background: rgba(255,255,255,.055);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform .25s ease, background .25s ease, border-color .25s ease;
+    }
+
+    .skill-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.24);
+    }
+
+    .skill-card strong {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .skill-card span {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+@media (max-width: 600px) {
+      body {
+        background-attachment: scroll;
+      }
+
+      .page {
+        padding-top: 35px;
+      }
+
+      h1 {
+        font-size: 28px;
+      }
+
+      .link-card {
+        min-height: 68px;
+      }
+    }
+  
+
+    @media (max-width: 520px) {
+      .skills-grid {
+        gap: 9px;
+      }
+      .skill-card {
+        min-height: 90px;
+        padding: 16px;
+      }
+    }
+</style>
+
+<style id="skill-bars-style">
+.skills-section{margin:22px 0}
+.skills-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.skill-card{padding:15px 16px;border:1px solid rgba(255,255,255,.10);border-radius:16px;background:rgba(255,255,255,.045);backdrop-filter:blur(12px)}
+.skill-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;font-size:14px;font-weight:700}
+.skill-top b{opacity:.65;font-size:12px}
+.skill-bar{height:7px;width:100%;border-radius:999px;background:rgba(255,255,255,.12);overflow:hidden}
+.skill-bar span{display:block;height:100%;border-radius:999px;background:#fff;box-shadow:0 0 10px rgba(255,255,255,.22)}
+@media(max-width:600px){.skills-grid{grid-template-columns:1fr}}
+</style>
+
+
+<style id="start-screen-click-style">
+.start-screen{cursor:pointer}
+.start-screen .start-box{cursor:pointer}
+</style>
+
+
+<style id="start-screen-force-click">
+#startScreen{
+  position:fixed !important;
+  inset:0 !important;
+  z-index:999999 !important;
+  width:100vw !important;
+  height:100vh !important;
+  pointer-events:auto !important;
+  cursor:pointer !important;
+}
+#startScreen.hidden{
+  pointer-events:none !important;
+}
+#startScreen .start-box{
+  pointer-events:none !important;
+}
+</style>
+
+</head>
+
+<body>
+
+  <div class="start-screen" id="startScreen">
+    <button class="start-box" id="startBtn" type="button">
+      <span>ЖМИ, ХУЛИ СМОТРИШЬ</span>
+    </button>
+  </div>
+
+  <div class="noise"></div>
+
+  <main class="page">
+    <section class="profile">
+      <div class="avatar-wrap">
+        <img class="avatar" src="avatar.jpg" alt="oxanil">
+      </div>
+
+      <h1>oxanil <span class="verified">✓</span></h1>
+      <div class="username">@oxanil</div>
+
+      <p class="bio">
+        Создаю вещи, которые хочется смотреть.<br>
+        new developer
+      </p>
+</section>
+
+    <section class="skills-section">
+  <div class="skills-grid">
+    <div class="skill-card">
+      <div class="skill-top"><span>HTML</span><b>50%</b></div>
+      <div class="skill-bar"><span style="width:50%"></span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span>Python</span><b>25%</b></div>
+      <div class="skill-bar"><span style="width:25%"></span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span>C#</span><b>0%</b></div>
+      <div class="skill-bar"><span style="width:0%"></span></div>
+    </div>
+    <div class="skill-card">
+      <div class="skill-top"><span>C++</span><b>0%</b></div>
+      <div class="skill-bar"><span style="width:0%"></span></div>
+    </div>
+  </div>
+</section>
+
+    <section class="featured">
+      <div class="featured-label">FEATURED</div>
+      <h2>Новый проект уже здесь</h2>
+      <p>Посмотри, над чем я работал последнее время.</p>
+      <a class="featured-btn" href="https://discord.gg/Fsp7BAnMZ7" target="_blank" rel="noopener noreferrer">Открыть</a>
+    </section>
+
+    <div style="margin-top: 14px;">
+    </div>
+
+    <div class="section-title">Links</div>
+
+    <section class="links">
+      <a class="link-card" href="https://t.me/brigav" target="_blank" rel="noopener noreferrer">
+        <div class="icon">✉</div>
+        <div class="link-text">
+          <div class="link-title">Связаться со мной</div>
+          <div class="link-sub">По вопросам</div>
+        </div>
+        <div class="arrow">›</div>
+      </a>
+    </section>
+
+    <section class="music">
+      <div class="music-top">
+        <img class="music-cover" src="favicon.jpg" alt="Music cover">
+
+        <div class="music-info">
+          <div class="music-label">NOW PLAYING</div>
+          <div class="music-title">песня ебанутая играет</div>
+          <div class="music-sub">я вахуе</div>
+        </div>
+
+        <button class="play" id="playBtn" type="button" aria-label="Play">▶</button>
+      </div><div class="progress-wrap">
+        <input class="progress" id="progress" type="range" min="0" max="100" value="0">
+        <div class="time">
+          <span id="currentTime">0:00</span>
+          <span id="duration">0:00</span>
+        </div>
+<div class="volume-row">
+        <span class="volume-icon" id="volumeIcon">🔊</span>
+        <input class="volume" id="volume" type="range" min="0" max="100" value="70" aria-label="Громкость">
+        <span class="volume-value" id="volumeValue">70%</span>
+      </div>
+      </div>
+
+      <audio id="audio" preload="metadata">
+        <source src="music.mp3" type="audio/mpeg">
+      </audio>
+    </section>
+
+    
+  </main>
+
+  <script>
+    const audio = document.getElementById("audio");
+    const playBtn = document.getElementById("playBtn");
+    const progress = document.getElementById("progress");
+    const currentTime = document.getElementById("currentTime");
+    const duration = document.getElementById("duration");
+    const volume = document.getElementById("volume");
+    const volumeValue = document.getElementById("volumeValue");
+    const volumeIcon = document.getElementById("volumeIcon");
+
+
+    const startScreen = document.getElementById("startScreen");
+    const startBtn = document.getElementById("startBtn");
+
+const enterSite = async () => {
+  if (startScreen.classList.contains("hidden")) return;
+
+  startScreen.classList.add("hidden");
+
+  try {
+    await audio.play();
+  } catch (e) {
+    console.log("Playback was blocked:", e);
+  }
+};
+
+startScreen.addEventListener("pointerdown", enterSite, { once: true });
+
+    startBtn.addEventListener("click", async () => {
+      startScreen.classList.add("hidden");
+
+      try {
+        await audio.play();
+      } catch (e) {
+        console.log("Playback was blocked:", e);
+      }
+    });
+
+    audio.volume = 0.7;
+
+    function updateVolume() {
+      const value = Number(volume.value);
+      audio.volume = value / 100;
+      volumeValue.textContent = `${value}%`;
+      volumeIcon.textContent = value === 0 ? "🔇" : value < 45 ? "🔉" : "🔊";
+    }
+
+    volume.addEventListener("input", updateVolume);
+    updateVolume();
+
+    function formatTime(seconds) {
+      if (!Number.isFinite(seconds)) return "0:00";
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60).toString().padStart(2, "0");
+      return `${min}:${sec}`;
+    }
+
+    playBtn.addEventListener("click", async () => {
+      if (audio.paused) {
+        try {
+          await audio.play();
+        } catch (e) {
+          console.log("Playback was blocked:", e);
+        }
+      } else {
+        audio.pause();
+      }
+    });
+
+    audio.addEventListener("play", () => {
+      playBtn.textContent = "❚❚";
+    });
+
+    audio.addEventListener("pause", () => {
+      playBtn.textContent = "▶";
+    });
+
+    audio.addEventListener("loadedmetadata", () => {
+      duration.textContent = formatTime(audio.duration);
+    });
+
+    audio.addEventListener("timeupdate", () => {
+      if (audio.duration) {
+        progress.value = (audio.currentTime / audio.duration) * 100;
+      }
+      currentTime.textContent = formatTime(audio.currentTime);
+    });
+
+    progress.addEventListener("input", () => {
+      if (audio.duration) {
+        audio.currentTime = (progress.value / 100) * audio.duration;
+      }
+    });
+
+    // Небольшой эффект движения карточек мышью
+    document.querySelectorAll(".link-card").forEach(card => {
+      card.addEventListener("mousemove", e => {
+        const rect = card.getBoundingClientRect();
+        const x = (e.clientX - rect.left) / rect.width - .5;
+        const y = (e.clientY - rect.top) / rect.height - .5;
+        card.style.transform =
+          `perspective(700px) rotateX(${-y * 2}deg) rotateY(${x * 2}deg) translateY(-3px)`;
+      });
+
+      card.addEventListener("mouseleave", () => {
+        card.style.transform = "";
+      });
+    });
+  </script>
+</body>
+</html>
